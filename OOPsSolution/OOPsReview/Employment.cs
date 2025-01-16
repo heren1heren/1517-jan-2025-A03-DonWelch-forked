@@ -139,10 +139,14 @@ namespace OOPsReview
         ///</summary>
 
         //can an auto-implemented be coded as a fully implemented
+
+        //change to set in demostrating private used iin fully implement property
+
         public SupervisoryLevel Level
         {
             get { return _Level; }
-            set { _Level = value; }
+            //set { _Level = value; }
+            private set { _Level = value; }
         }
 
         //Constructors
@@ -214,16 +218,67 @@ namespace OOPsReview
             // .Now has a specific time of day 13:05:45 PM
             //by using the .Today.AddDays(1) you cover all times on a specific date
 
-            if (startdate >= DateTime.Today.AddDays(1))
+            if (CheckDate(startdate))
             {
-                throw new ArgumentException($"The start date of {startdate} is invalid. Date cannot be in the future");
+                StartDate =startdate;
             }
-            StartDate =startdate;
-
 
         }
 
         //Methods (aka Behaviours)
 
+        //syntax:  accesslevel [override] returndatatype methodname ([option parameter list]) { .. coding block ...}
+
+        public override string ToString()
+        {
+            //realize that to used an item withn your instance, you must have the instance
+            //if you has the instance then you have the data within the instance ALREADY
+            //THERFORE, if the data is within the instance you DO NOT need to pass the data into your method
+
+            //this string is known as a "comma separate value" string (csv)
+            //concern: when the date is used, it could have a , within the data value
+            //solution: IF this is a possibility that a value that is used in creating the string pattern
+            //              could make the pattern invalid, you should explicitly handle how the value should be
+            //              displayed in the string
+            //example Date:  Jan 05, 2025 (due to using StartDate.ToShortDate())
+            //solution:  specific your own format  StartDate.ToString("MMM dd yyyy")
+
+            //Another solution is to change your delimitator that separates your values to a character
+            //  that is not within your range of possible values
+            //example use a '/'
+            //when you use the .Split(delimitator) method to breakup the string into separate values
+            //  you would use the delimitator '/':  string [] pieces = thestring.Split('/')
+            return $"{Title},{Level},{StartDate.ToString("MMM dd yyyy")},{Years}";
+        }
+
+        //StartDate is private set
+        //Note: when you have a private set, you MAY NEED to duplicate validation in several
+        //      places (constructor AND this method)
+        public void CorrectStartDate(DateTime startdate)
+        {
+            if(CheckDate(startdate))
+                StartDate =startdate;
+        }
+
+        //create a private method to handle duplicate code within a class where the method
+        //  is NOT for use by the outside user
+        //Example: the validation of startdate is in two places
+        //          reduce redundance by making a private method 
+        private bool CheckDate(DateTime value)
+        {
+            if (value >= DateTime.Today.AddDays(1))
+            {
+                throw new ArgumentException($"The start date of {value} is invalid. Date cannot be in the future");
+            }
+            return true;
+        }
+
+        //Sample action: changed the SupervisoryLevel to be a private set
+        //this means altering the Level must be done in constructor (which executes ONLY ONCE during creation) or
+        //  via a method
+        public void SetEmploymentResponsibilityLevel(SupervisoryLevel level)
+        {
+            Level = level;
+        }
     }
 }
