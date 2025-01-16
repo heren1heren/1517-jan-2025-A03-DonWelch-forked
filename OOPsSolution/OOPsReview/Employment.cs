@@ -84,7 +84,7 @@ namespace OOPsReview
                     //it is a very good practice to remove leading and trailing spaces on strings
                     //  so that only the required and important characters are stored.
                     //to do this santization use .Trim()
-                  _Title = value.Trim();
+                    _Title = value.Trim();
                 }
             }
         }
@@ -174,7 +174,7 @@ namespace OOPsReview
             // your internal fields may have validation attached to the data for the field
             // this validation is usually within the property
             // you would wish to have valid data values for your internal fields
-            Title = "UnKnown";      //satisfy validation
+            Title = "Unknown";      //satisfy validation
             Level = SupervisoryLevel.TeamMember;  // desired a different initial value
             StartDate = DateTime.Today; //system default is unacceptable
 
