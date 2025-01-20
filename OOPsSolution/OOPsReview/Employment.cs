@@ -210,9 +210,9 @@ namespace OOPsReview
         {
             Title = title;
             Level = level;
-            Years = years;
+            //Years = years;
 
-            //one could add valiation, especially if the property has a private set  OR the property
+            //one could add validation, especially if the property has a private set  OR the property
             //  is an auto-implemented property that has restrictions
             //example
             //validation, start date must not exist in the future
@@ -231,6 +231,11 @@ namespace OOPsReview
                 StartDate =startdate;
             }
 
+            //the data for years needs to be set according to the start date
+            //if the value for years is the default AND the start date is NOT the current date
+            //  then years should be corrected to the start date.
+            TimeSpan days = DateTime.Today - startdate;
+            Years = Math.Round((days.Days / 365.2), 1);
         }
 
         //Methods (aka Behaviours)
@@ -266,6 +271,8 @@ namespace OOPsReview
         {
             if(CheckDate(startdate))
                 StartDate =startdate;
+            TimeSpan days = DateTime.Today - startdate;
+            Years = Math.Round((days.Days / 365.2), 1);
         }
 
         //create a private method to handle duplicate code within a class where the method
