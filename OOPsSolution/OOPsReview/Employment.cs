@@ -101,9 +101,17 @@ namespace OOPsReview
             get { return _Years; }
             set
             {
-                if (value < 0)
+                //replace the hard-coded validation test with a static method
+                //  int a "utilities" class
+                //if (value < 0)
+
+                //use the sample static method from the Utilities class
+                //at compile time, the system will determind by your call and the
+                //  list of parameters which overloaded method to use
+
+                if (!Utilities.IsZeroOrPositive(value))
                 //{
-                    throw new ArgumentException($"The years of {value} is incorrected. Years must be 0 ro greater");
+                    throw new ArgumentException($"The years of {value} is incorrected. Years must be 0 or greater");
                // }
                // else
                // {
