@@ -13,6 +13,10 @@ namespace OOPsReview
         public ResidentAddress Address { get; set; }
         public List<Employment> EmploymentPositions { get; set; }
 
+        //public string FullName  => LastName + ", " + FirstName;
+
+        public string FullName { get { return LastName + ", " + FirstName; } }
+
         public Person()
         {
             FirstName = "Unknown";

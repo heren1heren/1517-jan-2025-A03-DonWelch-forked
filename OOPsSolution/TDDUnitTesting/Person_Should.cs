@@ -170,8 +170,64 @@ namespace TDDUnitTesting
         }
 
         //directly change the last name (via property)
+        [Fact]
+        public void Change_Last_Name_Via_Property()
+        {
+            //Arrange
+            string expectedLastName = "Ujest";
+            //Person sut = new Person();
+            Person sut = new Person("Don", "Welch", null, null);
+
+            //Act
+            sut.LastName = "Ujest";
+
+            //Assert
+            sut.LastName.Should().Be(expectedLastName);
+        }
         //directly change the Address (via property : an address or null)
+        [Fact]
+        public void Change_Address_Via_Property_With_New_Address()
+        {
+            //Arrange
+            ResidentAddress expectedAddress = new ResidentAddress(321, "Ash Lane", "Edmonton","AB","T5R4E3");
+            //Person sut = new Person();
+            Person sut = new Person("Don", "Welch", new ResidentAddress(123, "Maple St", "Edmonton", "AB", "T6Y7U8"), null);
+
+            //Act
+            sut.Address = new ResidentAddress(321, "Ash Lane", "Edmonton", "AB", "T5R4E3");
+
+            //Assert
+            sut.Address.Should().Be(expectedAddress);
+        }
+        [Fact]
+        public void Change_Address_Via_Property_With_No_Address()
+        {
+            //Arrange
+            
+            //Person sut = new Person();
+            Person sut = new Person("Don", "Welch", new ResidentAddress(123, "Maple St", "Edmonton", "AB", "T6Y7U8"), null);
+
+            //Act
+            sut.Address = null;
+
+            //Assert
+            sut.Address.Should().BeNull();
+        }
         //obtain the person's fullname using the existing instance data (last, first)
+        [Fact]
+        public void Retreive_Full_Name()
+        {
+            //Arrange
+            string expectedFullName = "Welch, Don";
+            //Person sut = new Person();
+            Person sut = new Person("Don", "Welch", null, null);
+
+            //Act
+            string fullname = sut.FullName;
+
+            //Assert
+            fullname.Should().Be(expectedFullName);
+        }
         #endregion
         #region Exception Tests
         //throw exception on missing first name (via property)
