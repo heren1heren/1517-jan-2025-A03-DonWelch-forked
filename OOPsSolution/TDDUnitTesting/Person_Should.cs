@@ -231,12 +231,61 @@ namespace TDDUnitTesting
         #endregion
         #region Exception Tests
         //throw exception on missing first name (via property)
+        //3 possible checks null, empty string and blank string
+        //solutions:
+        //a) 3 separate Fact tests
+        //b) 1 Theory test
+        //NOTE: the item being tested is the same property with multiple values
+        //      the same exception message is expected
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void Throw_Exception_Changing_FirstName_Via_Property_Missing_Data(string testvalue)
+        {
+            //Arrange
+            //since the act will be against a property, an instance is required
+            Person sut = new Person(); //could also have used the greedy constructor
+
+            //Act
+            Action action = () => sut.FirstName = testvalue;
+
+            //Assert
+            action.Should().Throw<ArgumentNullException>();
+        }
         //throw exception on missing last name (via property)
-        //no employment should be added via the set property (rstrict set access)
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void Throw_Exception_Changing_LastName_Via_Property_Missing_Data(string testvalue)
+        {
+            //Arrange
+            //since the act will be against a property, an instance is required
+            Person sut = new Person(); //could also have used the greedy constructor
+
+            //Act
+            Action action = () => sut.LastName = testvalue;
+
+            //Assert
+            action.Should().Throw<ArgumentNullException>();
+        }
+        //no employment should be added via the set property (restrict set access)
+        //  even though thought of, a private set (mutator) will not compile
+        //  therefore, this test is not required
         #endregion
         #endregion
 
         #region Methods
+        #region Successful Tests
+        //able to add a new employment instance to collection
+        //able to change the person's full name
+        #endregion
+        #region Exceptionn Tests
+        //cannot change full name: missing data
+        //cannot add new employment: missing data
+        //duplicate employment instances???
+        #endregion
         #endregion
     }
 }
