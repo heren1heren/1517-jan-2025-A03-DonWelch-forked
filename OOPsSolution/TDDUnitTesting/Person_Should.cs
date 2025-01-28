@@ -279,9 +279,59 @@ namespace TDDUnitTesting
         #region Methods
         #region Successful Tests
         //able to add a new employment instance to collection
+        [Fact]
+        public void Add_New_Employment_To_Collection()
+        {
+            //Arrange
+            Employment one = new Employment("PG I", SupervisoryLevel.TeamMember,
+                                                DateTime.Parse("2013/10/10"), 6.5);
+            TimeSpan days = DateTime.Today.AddDays(-1) - DateTime.Parse("2020/04/10");
+            double years = Math.Round(days.Days / 365.2, 1);
+            Employment two = new Employment("PG II", SupervisoryLevel.TeamMember,
+                                               DateTime.Parse("2020/04/10"),years);
+            
+            //the setup collection (before image)
+            List<Employment> Employments = new List<Employment>();
+            Employments.Add(one);
+            Employments.Add(two);
+            Person sut = new Person("Don", "Welch", null, Employments);
+
+            //new employment instance
+            Employment three = new Employment("Sup I", SupervisoryLevel.Supervisor,
+                                               DateTime.Today, 0.0);
+
+            //the expected collection (after image)
+            List<Employment> expectedEmployments = new List<Employment>();
+            expectedEmployments.Add(one);
+            expectedEmployments.Add(two);
+            expectedEmployments.Add(three);
+
+            int expectedEmploymentPositionsCount = 3;
+
+            //Act
+            sut.AddEmployment(three);
+
+            //Assert
+            sut.EmploymentPositions.Count.Should().Be(expectedEmploymentPositionsCount);
+            sut.EmploymentPositions.Should().ContainInConsecutiveOrder(expectedEmployments);
+
+        }
         //able to change the person's full name
+        [Fact]
+        public void Change_Full_Name_At_Once()
+        {
+            //Arrange
+            Person sut = new Person();
+            string expectedFullName = "Kase, Charity";
+
+            //Act
+            sut.ChangeFullName("Charity", "Kase");
+
+            //Assert
+            sut.FullName.Should().Be(expectedFullName);
+        }
         #endregion
-        #region Exceptionn Tests
+        #region Exception Tests
         //cannot change full name: missing data
         //cannot add new employment: missing data
         //duplicate employment instances???

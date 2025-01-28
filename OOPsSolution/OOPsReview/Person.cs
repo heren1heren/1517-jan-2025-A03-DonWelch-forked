@@ -58,5 +58,16 @@ namespace OOPsReview
             else
                 EmploymentPositions = new List<Employment>();
         }
+
+        public void AddEmployment(Employment employment)
+        {
+            EmploymentPositions.Add(employment);
+        }
+
+        public void ChangeFullName(string firstname, string lastname)
+        {
+            FirstName = firstname;
+            LastName = lastname;
+        }
     }
 }
