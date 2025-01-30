@@ -376,6 +376,40 @@ namespace TDDUnitTesting
         }
         //duplicate employment instances???
         //adding new employment: data already present
+        [Fact]
+        public void Throw_Exception_Adding_Employment_History_With_Duplicate_History()
+        {
+  
+            //Arrange
+            Employment one = new Employment("PG I", SupervisoryLevel.TeamMember,
+                                                DateTime.Parse("2013/10/10"), 6.5);
+            TimeSpan days = DateTime.Today.AddDays(-1) - DateTime.Parse("2020/04/10");
+            double years = Math.Round(days.Days / 365.2, 1);
+            Employment two = new Employment("PG II", SupervisoryLevel.TeamMember,
+                                               DateTime.Parse("2020/04/10"), years);
+            Employment three = new Employment("Sup I", SupervisoryLevel.Supervisor,
+                                              DateTime.Today, 0.0);
+
+            //the setup collection (before image)
+            List<Employment> Employments = new List<Employment>();
+            Employments.Add(one);
+            Employments.Add(two);
+            Employments.Add(three);
+            Person sut = new Person("Don", "Welch", null, Employments);
+
+
+            //Act
+            Action action = () => sut.AddEmployment(three);
+
+            //Assert
+            //one can test the contents of the error message being thrown
+            //this is done using the .WithMessage(string)
+            //a substring of the erro message can be checked using *.....* for the string
+            //one can use string interpolation with the creation of the string
+            action.Should()
+                    .Throw<ArgumentException>()
+                       .WithMessage($"*{three.Title} on {three.StartDate}*");
+        }
         #endregion
         #endregion
     }

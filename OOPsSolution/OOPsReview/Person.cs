@@ -63,6 +63,15 @@ namespace OOPsReview
         {
             if (employment == null)
                 throw new ArgumentNullException("Employment required, missing employment data. Unable to add eployment history");
+            
+            //search the collection for a duplicate history instance
+            //  duplicate match based on Title and StartDate
+            if(EmploymentPositions.Any(ep => ep.Title.Equals(employment.Title)
+                                          && ep.StartDate == employment.StartDate ))
+            {
+                throw new ArgumentException($"Duplicate employment",
+                        $"Employment record with position {employment.Title} on {employment.StartDate}.");
+            }
             EmploymentPositions.Add(employment);
         }
 
