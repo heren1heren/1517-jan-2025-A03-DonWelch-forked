@@ -231,11 +231,25 @@ namespace OOPsReview
                 StartDate =startdate;
             }
 
-            //the data for years needs to be set according to the start date
-            //if the value for years is the default AND the start date is NOT the current date
-            //  then years should be corrected to the start date.
-            TimeSpan days = DateTime.Today - startdate;
-            Years = Math.Round((days.Days / 365.2), 1);
+            if(years != 0)
+            {
+                Years = years;
+            }
+            else
+            {
+                if (startdate == DateTime.Today)
+                {
+                    Years = 0;
+                }
+                else
+                {
+                    //the data for years needs to be set according to the start date
+                    //if the value for years is the default AND the start date is NOT the current date
+                    //  then years should be corrected to the start date.
+                    TimeSpan days = DateTime.Today - startdate;
+                    Years = Math.Round((days.Days / 365.2), 1);
+                }
+            }
         }
 
         //Methods (aka Behaviours)
