@@ -62,8 +62,23 @@
     * data is automatically moved between the control and the variable
     */
 
-    private string WelcomeMsg = "Let us get started";
+    private string WelcomeMsg = "";
     private string inputValue = "";
+
+    //there are special events already created for the blazor component
+    // one is the ability to execute code as the page is 1st created
+    // the OnInitialized() method, is executed when the page is 1st created, 
+    //      IT DOES NOT EXECUTE AGAIN IF YOU REMAIN ON THE PAGE!!!
+    // it can be used to place special messages on the appearence of a page
+    //  or  initialize  variables on your page
+
+    protected override void OnInitialized()
+    {
+        //this method will initialize th WelcomeMsg variable
+
+        WelcomeMsg = "Let us get started";
+        base.OnInitialized(); //I do not remove this command
+    }
 
     private void OnClear()
     {
@@ -72,6 +87,42 @@
 
     private void OnGame()
     {
-        
+        //play the game Heads (0) or Tails (1)
+        //use the WelcomeMsg variable to display the results of the flip
+
+        WelcomeMsg = ""; //clean out any old message disply
+
+        Random rnd = new Random();
+        int flip = rnd.Next(0, 2); // generate a value of 0 or 1
+        if (flip == 0)
+        {
+            if(inputValue.ToUpper().Trim().Equals("H"))
+            {
+                WelcomeMsg = "You guessed the computer flip. You win.";
+            }
+            else if (inputValue.ToUpper().Trim().Equals("T"))
+            {
+                WelcomeMsg = "You did not guessed the computer flip. You lose.";
+            }
+            else
+            {
+                WelcomeMsg = "You did not enter an H to T";
+            }
+        }
+        else
+        {
+            if (inputValue.ToUpper().Trim().Equals("T"))
+            {
+                WelcomeMsg = "You guessed the computer flip. You win.";
+            }
+            else if (inputValue.ToUpper().Trim().Equals("H"))
+            {
+                WelcomeMsg = "You did not guessed the computer flip. You lose.";
+            }
+            else
+            {
+                WelcomeMsg = "You did not enter an H to T";
+            }
+        }
     }
 }
