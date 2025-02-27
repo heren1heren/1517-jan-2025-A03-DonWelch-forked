@@ -2,6 +2,11 @@
 <PageTitle>Tabular Report</PageTitle>
 @rendermode InteractiveServer
 
+<!--
+    include any additional namespaces
+-->
+@using OOPsReview;
+
 <h1>Employment History</h1>
 <h4>using a scrolling Tabular Report</h4>
 
@@ -45,10 +50,188 @@
     </div>
 }
 
+<!--
+    display area
+
+    3 possible scenarios
+    a) no physical collection has been created
+            - no table should be display on the page
+    b) collection physically exists but is empty
+            - a message should be displayed to the user
+    c) collection physically exists and has records to display
+            - the records should be display in the desire output format.
+-->
+@if(employments == null)
+{
+    <p>Read a csv file containing your employment data.</p>
+}
+else if(employments.Count == 0)
+{
+    <p>No employment history to report</p>
+}
+else
+{
+    //to reduce the number of data rows being displayed there are two techniques
+    //a) pagination
+    //b) scrolling
+
+    //this example uses the quick and easy technique of scrolling
+    //Note the table is surrounded by a div tag
+    //     on the div tag is 2 parameters
+    //      the class causes the scroll (built into bootstrap)
+    //      the style specifies the height of the display area
+
+    //depending on the zoom of window you may seem to lose some of the last line
+    <div class="row">
+        <div class="offset-3 col-md-6 overflow-scroll" style="height:300px;">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Level</th>
+                        <th>Start Date</th>
+                        <th>Years</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(Employment item in employments)
+                    {
+                        <tr>
+                            <td>@item.Title</td>
+                            <td>@item.Level</td>
+                            <td>@item.StartDate.ToString("MMM dd, yyyy").ToUpper()</td>
+                            <td>@item.Years</td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+
+
+
 @code {
     private string feedBackMsg = "";
 
     //could be using a List<string> as well as this Dictionary
     private List<string> errorMsgs = new ();
 
+    //create a variable to hold a collection of the data
+    //  to be displayed on the web page
+    List<Employment> employments = null;
+
+    //create a variable to hold an instance of the data
+    Employment employment = null;
+
+    private Exception GetInnerException(Exception ex)
+    {
+        //handle any type of exception: therefore use most generic datatype: Exception
+
+        //loop through the layers of errors within the InnerException of the exception class
+        while (ex.InnerException !=null)
+            ex = ex.InnerException;
+
+        return ex;
+    }
+
+    protected override void OnInitialized()
+    {
+        //so to simulate an event the read processing will be place
+        //  in a separate method
+        //if you are NOT using a button to cause the display to happen
+        //  and the display is to appear as the page 1st appears
+        //  your logic could go directly within this method (OnInitialized)
+        Reading();
+        base.OnInitialized();
+    }
+
+    private void Reading()
+    {
+        //clear out all old messages
+        feedBackMsg = "";
+        errorMsgs.Clear();
+
+        //there are a couple of ways to refer to your file and its path
+        //  i) obtain the root path of your application using an injection
+        //      service called IWebHostEnvironment via property injection (see variables)
+        //  ii) use relative addressing starting a the top of your application
+
+        //on this page we will demo (ii)
+        //this addressing of the required file will start at the top
+        //  of your web application
+        //syntax: @"./folderpathroute/.../.../filename"
+
+        //string filename = @"./Data/Employment.csv";
+        //string filename = @"./Data/EmploymentEmpty.csv";
+        //string filename = @"./Data/EmploymentBad.csv";
+
+        string filePathName = @"./Data/";
+        string[] filenames = new string[]
+        {
+            "Employment.csv", "EmploymentEmpty.csv", "EmploymentBad.csv", "NoFile.csv"
+        };
+        string filename = $@"{filePathName}{filenames[0]}";
+
+        //The System.IO.File method ReadAllLines() will return an array
+        //  of lines as strings where each array element represents a
+        //  line in the file
+        Array userdata = null;
+
+        //can system error occur: YES
+        //whenever you are dealing with possible system errors or other class errors
+        //  you should user "user friendly error handling"
+        try
+        {
+            //consider checking if your file exists
+            if (System.IO.File.Exists(filename))
+            {
+                //create an instance of the collection to hold the incoming records
+                employments = new List<Employment>();
+
+                //read the file
+                userdata = System.IO.File.ReadAllLines(filename);
+
+                //traverse the array (lines from the file)
+                //ensure that there is sufficient data on the line to create the required instance
+                //if not: throw an FormatException
+                //if so: create an instance of the required class definition
+                //       add the instance to the collection
+                foreach(string line in userdata)
+                {
+                    //create an instance of employment
+                    employment = Employment.Parse(line);
+                    //add the instance to the collection
+                    employments.Add(employment);
+                }
+            }
+            else
+            {
+                throw new Exception($"file: {filename} does not exist.");
+            }
+
+        }
+        catch (ArgumentNullException ex)
+        {
+            //in this example erroMsgs is a List<string> therefore unlike
+            //  a Dictionary, no key string is required
+            errorMsgs.Add($"Missing Data: {GetInnerException(ex).Message}");
+        }
+        catch (FormatException ex)
+        {
+            //in this example erroMsgs is a List<string> therefore unlike
+            //  a Dictionary, no key string is required
+            errorMsgs.Add($"Read Data Error: {GetInnerException(ex).Message}");
+        }
+        catch (ArgumentException ex)
+        {
+            errorMsgs.Add($"Bad value: {GetInnerException(ex).Message}");
+        }
+        catch (Exception ex)
+        {
+            errorMsgs.Add($"System Error: {GetInnerException(ex).Message}");
+        }
+    }
 }
