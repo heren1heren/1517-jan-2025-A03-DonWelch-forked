@@ -150,24 +150,12 @@ else
 
     private void Reading()
     {
-        //clear out all old messages
+   
         feedBackMsg = "";
         errorMsgs.Clear();
 
-        //there are a couple of ways to refer to your file and its path
-        //  i) obtain the root path of your application using an injection
-        //      service called IWebHostEnvironment via property injection (see variables)
-        //  ii) use relative addressing starting a the top of your application
-
-        //on this page we will demo (ii)
-        //this addressing of the required file will start at the top
-        //  of your web application
-        //syntax: @"./folderpathroute/.../.../filename"
-
-        //string filename = @"./Data/Employment.csv";
-        //string filename = @"./Data/EmploymentEmpty.csv";
-        //string filename = @"./Data/EmploymentBad.csv";
-
+    
+        
         string filePathName = @"./Data/";
         string[] filenames = new string[]
         {
@@ -175,35 +163,24 @@ else
         };
         string filename = $@"{filePathName}{filenames[2]}";
 
-        //The System.IO.File method ReadAllLines() will return an array
-        //  of lines as strings where each array element represents a
-        //  line in the file
+    
         Array userdata = null;
 
-        //can system error occur: YES
-        //whenever you are dealing with possible system errors or other class errors
-        //  you should user "user friendly error handling"
         try
         {
-            //consider checking if your file exists
+            
             if (System.IO.File.Exists(filename))
             {
-                //create an instance of the collection to hold the incoming records
                 employments = new List<Employment>();
 
-                //read the file
                 userdata = System.IO.File.ReadAllLines(filename);
 
-                //traverse the array (lines from the file)
-                //ensure that there is sufficient data on the line to create the required instance
-                //if not: throw an FormatException
-                //if so: create an instance of the required class definition
-                //       add the instance to the collection
+                
                 foreach(string line in userdata)
                 {
-                    //create an instance of employment
+                   
                     employment = Employment.Parse(line);
-                    //add the instance to the collection
+                    
                     employments.Add(employment);
                 }
             }
