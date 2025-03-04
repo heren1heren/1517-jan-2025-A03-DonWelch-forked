@@ -80,12 +80,15 @@ else
     //     on the div tag is 2 parameters
     //      the class causes the scroll (built into bootstrap)
     //      the style specifies the height of the display area
+    //to stick the thead to the top of your table use the following
+    //     styling on the thead tag
+    //          style="position: sticky; top: 0; background-color:white;"
 
     //depending on the zoom of window you may seem to lose some of the last line
     <div class="row">
         <div class="offset-3 col-md-6 overflow-scroll" style="height:300px;">
             <table class="table table-striped">
-                <thead>
+                <thead style="position: sticky; top: 0; background-color:white;">
                     <tr>
                         <th>Title</th>
                         <th>Level</th>
@@ -161,7 +164,7 @@ else
         {
             "Employment.csv", "EmploymentEmpty.csv", "EmploymentBad.csv", "NoFile.csv"
         };
-        string filename = $@"{filePathName}{filenames[2]}";
+        string filename = $@"{filePathName}{filenames[0]}";
 
     
         Array userdata = null;

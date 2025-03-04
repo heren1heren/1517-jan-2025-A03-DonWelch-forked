@@ -198,13 +198,18 @@ each row is stack top to bottom
     <div class="row">
         <div class="col-md-12 text-center">
             <button type="submit" class="btn btn-outline-primary rounded-pill"
-            @onclick="OnCollect">
+                    @onclick="OnCollect" style="width:155px;">
                 Submit
             </button>
             &nbsp;&nbsp;
             <button type="submit" class="btn btn-outline-secondary rounded-pill"
-            @onclick="OnClear">
+                    @onclick="OnClear" style="width:155px;">
                 Clear
+            </button>
+            &nbsp;&nbsp;
+            <button type="submit" class="btn btn-outline-secondary rounded-pill"
+            @onclick="OnGoToReport" style="width:155px;">
+                Go To Report
             </button>
         </div>
     </div>
@@ -246,6 +251,10 @@ each row is stack top to bottom
     //  for use to your application
     [Inject]
     public IWebHostEnvironment webHostEnvironment { get; set; }
+
+    //this inject is for the navigating from Page A to Page B
+    [Inject]
+    public NavigationManager navigationManager { get; set; }
 
     protected override void OnInitialized()
     {
@@ -384,7 +393,7 @@ each row is stack top to bottom
             {
                 errorMsgs.Add("System Error", $"System Error: {GetInnerException(ex).Message}");
             }
-            
+
         }
 
     }
@@ -414,6 +423,23 @@ each row is stack top to bottom
             empStartDate = DateTime.Today;
             empLevelS = SupervisoryLevel.Entry;
             empLevelR = SupervisoryLevel.Entry;
+        }
+    }
+
+    private async Task OnGoToReport()
+    {
+        //clear all old messages
+        feedBackMsg = "";
+
+        //issue a prompt dialogue to the user to obtain confirmation of the action
+        //create your message for the dialogue box into a generic object[]
+        object[] messageline = new object[]
+        {"Leaving the page will lose all unsaved data. Are you sure you wish to continue?"};
+        if (await jsRuntime.InvokeAsync<bool>("confirm", messageline))
+        {
+            //use the appropriate navigation service to go to another page
+            //use the routing page name to go to the desired page
+            navigationManager.NavigateTo("report");
         }
     }
 }
