@@ -70,12 +70,53 @@
                 //      the class causes the scroll (built into bootstrap)
                 //      the style specifies the height of the display area
 
+                //the shipment record has a field called ShipVia which is foreign key (1, 2, 3, etc)
+                //displaying that is meaningless to someone reading the data unless they were familiar with
+                //      the pkey value associated with each company
+                //solution: display the company name
+                //Problem: the name is in a different table
+
+                //If you look at the entities, records with fields used in sql scheme relationships
+                //      have virtual navigational properties (see bottom of entity)
+                //These properties allow you to have access to data in the related table
+
+                //How to use
+
+                //When you use the property just treat it as the name of an object so accessing the
+                //      desired field in the related table just needs the dot (.) operator
+                //In this example, the property is ShipViaNavigation which points to the Shippers table
+                //      and the desired field from the Shippers table was CompanyName
+                <div class="overflow-scroll" style="height:450px;">
+                    <table class="table table-striped">
+                        <thead style="position: sticky; top: 0; background-color:white;">
+                            <tr>
+                                <th>ID</th>
+                                <th>Order</th>
+                                <th>Date</th>
+                                <th>Shipper</th>
+                                <th>Freight $</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in shipmentList)
+                            {
+                                <tr>
+                                    <td>@item.ShipmentID</td>
+                                    <td>@item.OrderID</td>
+                                    <td>@item.ShippedDate.ToShortDateString()</td>
+                                    <td>@item.ShipViaNavigation.CompanyName</td>
+                                    <td align="right">@(string.Format("{0:#,##0.00}", item.FreightCharge))</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             }
         }
     </div>
 </div>
 
-    @code {
+@code {
     private string feedBackMsg = "";
     private List<string> errorMsgs = new List<string>();
 
@@ -86,14 +127,60 @@
     //output variables
     private List<Shipment> shipmentList = null;
 
+    //inject services
+    [Inject]
+    private ShipmentServices _shipmentServices { get; set; }
+
+    // [Inject]
+    // private ShipperServices _shipperServices { get; set; }
+    // private List<Shipper> shipperList = new List<Shipper>();
+
     protected override void OnInitialized()
     {
+        //there are two techniques to allow the use of navigational properties on your page
+        //      a) bring in a dataset of the table to which you are attempting to navigate
+        //      b) use the .Include method on the query itself (see Shipment query for this technique in BLL ShipmentServices)
+
+        // Technique (a)
+        // this data set is needed to handle the navigation reference used on the table data cell
+        //           to display the shipper company name
+        // no other coding is needed, the system will match up the dataset to the usage in the table above
+        //shipperList = _shipperServices.Shipper_GetAll();
+
         yeararg = DateTime.Today.Year;
         base.OnInitialized();
     }
 
     private void GetByYearAndMonth()
     {
-        
+        feedBackMsg = "";
+        errorMsgs.Clear();
+        shipmentList = null;
+
+        //validation
+        if (montharg < 1 || montharg > 12)
+        {
+            errorMsgs.Add("Your month value is invalid. Month is between 1 and 12");
+        }
+        if (yeararg < 1950 || yeararg > DateTime.Today.AddDays(1).Year)
+        {
+            errorMsgs.Add("Your year value is invalid. Year is between 1950 and today");
+        }
+
+        if(errorMsgs.Count == 0)
+        {
+            //the query arguments are deemed valid
+            //since the next statement calls a services which
+            //  in itself could abort, the call NEEDS to be in a try/catch
+            try
+            {
+                shipmentList = _shipmentServices.Shipment_GetByYearAndMonth(yeararg, montharg);
+            }
+            catch(Exception ex)
+            {
+                errorMsgs.Add($"System Error: {ex.Message}");
+            }
+
+        }
     }
 }
