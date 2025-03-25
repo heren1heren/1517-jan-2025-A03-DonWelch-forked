@@ -2,6 +2,56 @@
 
 <PageTitle>Home</PageTitle>
 
+<!-- Additional namespaces-->
+@using WestWindSystem.Entities;
+@using WestWindSystem.BLL;
+
+
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+Welcome to your new app. How to consume a service.
+
+<p>
+    WestWind Database Version Major: @buildVersion.Major Minor: @buildVersion.Minor
+    Build: @buildVersion.Build Version Date: @buildVersion.ReleaseDate.ToShortDateString()
+</p>
+
+<div class="row">
+    <div class="col-md-4">
+        <img src="./img/WestWind.png" alt="WestWind image" />
+    </div>
+    <div class="col-md-7">
+        <p>Welcome to your new app.</p>
+        <p>
+            Within this app, you will learn about the basics of Client Server. You will
+            use an solution containing a class library (application server) and a Blazor web
+            application (Client manager). You will learn to use reverse engineering to
+            create entity models that map your sql database. You will create services
+            within your app library for use by an outside user. You will use EntityFrameworkCore
+            to manage communication between your app library and database. You will
+            preform various queries against the database. You will learn how to maintain
+            a database record using CRUD.
+        </p>
+    </div>
+</div>
+@code{
+    private BuildVersion buildVersion{get;set;}
+
+    //services need to be injected
+    //you need to known the name of the services
+    [Inject]
+    public BuildVersionServices _buildVersionServices {get;set;}
+
+    protected override void OnInitialized()
+    {
+        //consume a service
+
+        //the service class exists for use within this component via the injection
+        //the actual access to the services is via the IServiceCollection
+        //my services were made available to this component due to the fact that the
+        //  registered services were done in the Program.cs file during the build of
+        //  the app
+        buildVersion = _buildVersionServices.BuildVersion_Get();
+        base.OnInitialized();
+    }
+}
