@@ -1,4 +1,4 @@
-﻿@page "/productcrud"
+﻿@page "/productcrud/{productid:int?}"
 @using WestWindSystem.Entities
 @using WestWindSystem.BLL
 
@@ -26,6 +26,13 @@
     [Inject]
     private ProductServices _productServices { get; set; }
     private Product CurrentProduct = new();
+
+    //declare the routing parameter
+    //this property needs a special annotation to indicate it is a parameter
+    //parameter properties need to be accessable by other pages (aka classes)
+    //  therefore they need to be public
+    [Parameter]
+    public int? productid { get; set; }
 
     [Inject]
     private CategoryServices _categoryServices { get; set; }

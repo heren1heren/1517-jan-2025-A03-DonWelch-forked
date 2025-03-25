@@ -1,10 +1,12 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 #region Additional Namespaces
+using Microsoft.EntityFrameworkCore;
 using WestWindSystem.DAL;
 using WestWindSystem.Entities;
 #endregion
@@ -27,6 +29,22 @@ namespace WestWindSystem.BLL
 
         //Queries
 
-       
+        //retreive the products for a given category id
+        //public List<Product> Product_GetByCategoryID(int categoryid)
+        //{
+        //    IEnumerable<Product> info = _context.Products
+        //                                        .Where(x => x.CategoryID == categoryid)
+        //                                        .OrderBy(x => x.ProductName);
+        //    return info.ToList();
+        //}
+
+        public List<Product> Product_GetByCategoryID(int categoryid)
+        {
+            IEnumerable<Product> info = _context.Products
+                                                .Include(x => x.Supplier)
+                                                .Where(x => x.CategoryID == categoryid)
+                                                .OrderBy(x => x.ProductName);
+            return info.ToList();
+        }
     }
 }
