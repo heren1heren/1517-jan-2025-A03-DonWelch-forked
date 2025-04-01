@@ -354,14 +354,82 @@ a @formname attribute with any unique value, or pass a FormName parameter if usi
             feedBackMessage = $"System Error: {GetInnerException(ex).Message}";
         }
     }
+    
     private void OnUpdate()
     {
+        //clear old messages
+        feedBackMessage = "";
+        validationMessageStore.Clear(); //this replaces the old List<string> errorMsgs
 
+        try
+        {
+            //the first test is to check to see if there are ANY errors already caught
+            //  by the form using the DataAnnotationsValidator?
+            if (editContext.Validate())
+            {
+
+                if (CurrentProduct.CategoryID == 0)
+                {
+                    validationMessageStore.Add(editContext.Field(nameof(CurrentProduct.CategoryID)),
+                                               "You must select a category");
+                }
+                if (CurrentProduct.SupplierID == 0)
+                {
+                    validationMessageStore.Add(editContext.Field(nameof(CurrentProduct.SupplierID)),
+                                               "You must select a supplier");
+                }
+
+                if (editContext.GetValidationMessages().Any())
+                {
+                    //notify  the editcontext that there has been a change to the message store
+                    editContext.NotifyValidationStateChanged();
+                }
+                else
+                {
+                    //the program assumes that the data is clean and can be further processed
+
+                    int rowsaffected = _productServices.Product_Update(CurrentProduct);
+
+                    //Question: DID you ACTUALLY change any records?
+                    //situation: an update was attempted but no records on the database were
+                    //              actually change AND the action did NOT abort 
+                    //in this case rowsafftected = 0
+                    if(rowsaffected == 0)
+                    {
+                        feedBackMessage = $"Product {CurrentProduct.ProductName} (id: {CurrentProduct.ProductID}) has not been updated";
+
+                    }
+                    else
+                    {
+                        feedBackMessage = $"Product {CurrentProduct.ProductName} (id: {CurrentProduct.ProductID}) has been updated";
+
+                    }
+                }
+            }
+        }
+        catch (ArgumentNullException ex)
+        {
+            //usually if an error occurs only ONE message will be executed
+            //You could setup a special error message string to display on your page
+            //  that is NOT the validationMessageStore and is NOT the feedBackMessage
+            //You could style this special error message string as an alert alert-danger
+            feedBackMessage = $"Missing Data: {GetInnerException(ex).Message}";
+        }
+        catch (ArgumentException ex)
+        {
+            feedBackMessage = $"Data Issue: {GetInnerException(ex).Message}";
+        }
+        catch (Exception ex)
+        {
+            feedBackMessage = $"System Error: {GetInnerException(ex).Message}";
+        }
     }
+   
     private void OnDiscontinue()
     {
 
     }
+    
     private async Task OnClear()
     {
         feedBackMessage = "";
