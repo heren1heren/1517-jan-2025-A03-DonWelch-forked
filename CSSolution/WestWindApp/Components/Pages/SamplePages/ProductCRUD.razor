@@ -220,6 +220,20 @@ a @formname attribute with any unique value, or pass a FormName parameter if usi
 
     protected override void OnInitialized()
     {
+        //when the page is first render, we need to determind if the page was called with
+        //   a pkey parameter value
+        // No value: assumption is a NEW (create) product will be done, nothing to lookup
+        // Yes value: assumption an existing product record will be altered or deleted
+        //            the current record on the database should be displayed to the user
+        //            within this method, lookup the record to display
+        //since the productid is a nullable variable, add the .Value to obtain the value,
+        //  and use .HasValue to test for the value
+
+        //NOTE: the retrieval of the product instance is REQUIRED BEFORE assigning the instance
+        //          to EditContext
+        if (productid.HasValue)
+            CurrentProduct = _productServices.Product_GetByID(productid.Value);
+
         //create the EditContext instance AND tie to the instance of the entity of the form
         editContext = new EditContext(CurrentProduct);
 
@@ -312,14 +326,14 @@ a @formname attribute with any unique value, or pass a FormName parameter if usi
                     //call the product services to receive the "good" data and add it to the database (CREATE!!!)
                     //call the appropriate service method and pass the current product instance
                     //the service method will return the new (identity) primary key value.
-                    int newproductid = 124;//_productServices.Product_Add(CurrentProduct);
+                    int newproductid = _productServices.Product_Add(CurrentProduct);
 
                     //if an error was thrown by the ProductServices or by the database
                     //  control will be passed to the catch
                     //if no error was thrown by the ProductServices or by the database
                     //  one assumes the data is on the database: success
                     //you need to communicate with the user this success
-                    feedBackMessage = $"Product {CurrentProduct.ProductName} (id: {newproductid} has been saved";
+                    feedBackMessage = $"Product {CurrentProduct.ProductName} (id: {newproductid}) has been saved";
                 }
             }
         }
