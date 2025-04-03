@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 #region Additional Namespaces
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using WestWindSystem.DAL;
 using WestWindSystem.Entities;
 #endregion
@@ -108,6 +109,12 @@ namespace WestWindSystem.BLL
             //after all business rules have been passed, you can assume the 
             //  data is good to be placed on the database
 
+            //if your field is an IDENTITY key then override any value in the field 
+            //set the pkey value to zero
+            //prevents an IDENTITY_INSERT flag problem from occuring
+            item.ProductID = 0;
+
+
             //there is two steps to complete the process of adding your data to the database
             // a) Staging
             // b) Commit
@@ -193,6 +200,143 @@ namespace WestWindSystem.BLL
             //  the value returned is the number of records altered on the database
             return _context.SaveChanges();
         }
+
+        //Delete: cruD
+        //there are two types of deletes: physical and logical
+        //Whether you have a physical or logical delete is determind WHEN
+        //  the system is designed (database, data requirements)
+
+        //Logical delete
+        //this happens when the records is deemed "unwanted" BUT CANNOT be 
+        //  physically removed from the database because the records has
+        //  a relationship to another records (parent/child) and the associated record
+        //  CANNOT be removed
+
+        //Example: The product record is a parent to ManitfestItems records
+        //         The the manitest record is need for tracking, it does to the receiver of the product
+        //so, because the other record(s) are required for the busines
+        //      one CANNOT physically remove the ("parent") product record.
+
+        //usually in this situation, the parent record (product) will have some type of field
+        //  that will indicate "deleted"
+        //on the product record such a field is the Discontinued field
+
+        //Question: If the record will not be deleted, what happens?
+        //Answer: here, you will actually do an update
+        //Within the method, it is a good practice NOT to rely on the user to set
+        //  the "logical delete" field to the delete status
+        //Your method should set the value
+
+        public int Product_LogicalDelete(Product item)
+        {
+            //do any validation needed within the service
+
+            //was data actually passed to the service
+            if (item == null)
+            {
+                throw new ArgumentNullException("Product information was not supplied.");
+            }
+
+            //does the product still exist on the database
+            //the product could have been physically deleted while
+            //  the user was doing some processing with the record in question
+
+            //even though this is an update, one technique is to use the existing
+            //  data already on the database
+            //the only value that needs to be altered is the Discontinue flag
+            //if other data was to be altered, then the user should first do the update
+            //  then do the discontinue
+
+            //remember, FirstOrDefault will either
+            //  a) return the requested record if found
+            //  b) return a null
+
+            Product exits = null;
+            exits =_context.Products
+                            .FirstOrDefault(x => x.ProductID == item.ProductID);
+            if (exits == null)
+                throw new ArgumentException($"Product {item.ProductName} " +
+                    $" of size {item.QuantityPerUnit} is not on file. Check for the product again.");
+
+            //for the logical delete
+            //  set the appropriate field to the value indicating "delete"
+            //this code is not relying on the user to have set the appropriate
+            //  field on the
+            //  note: no OTHER field on the current record is altered
+            exits.Discontinued = true;
+
+            //there is two steps to complete the process of adding your data to the database
+            // a) Staging
+            // b) Commit
+
+            EntityEntry<Product> updating = _context.Entry(exits); //updating the retreived db record!!!
+            updating.State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+
+            //Commit
+            // this sends the ALL staged data in local memory to the database for processing
+
+            //AFTER the successful commit to the database, 
+            //  the value returned is the number of records altered on the database
+            return _context.SaveChanges();
+        }
+
+        //Physical Delete
+        //you physically remove the record from the database
+        //IF there are no "child" records to prevent the record removal, you can remove the record
+        //IF there are "children" AND the "children" are not required, you can remove the record
+        //      HOWEVER, you will need to first remove any "children" before removing the parent record
+        //      assuming there is no cascade delete setup on the database
+
+        public int Product_PhysicalDelete(Product item)
+        {
+            //do any validation needed within the service
+
+            //was data actually passed to the service
+            if (item == null)
+            {
+                throw new ArgumentNullException("Product information was not supplied.");
+            }
+
+            //does the product id exist on the database
+
+            if (!_context.Products.Any(x => x.ProductID == item.ProductID))
+            {
+                throw new ArgumentException($"Product {item.ProductName}  " +
+                    $"  of size {item.QuantityPerUnit} is not on file. Check for the product again.");
+            }
+
+            //this delete assumes that there is no appropriate field on the 
+            //  record to indicate a logical "delete" and thus: a physical
+            //  delete will occur
+
+            //HOWEVER!! this record could be a parent to one or more "child" records
+            //One should ensure that there is no existing child record for the
+            //  parent BEFORE attempting the delete
+
+
+            //using the virual navigational properties, one could check to see
+            //  if any child records (collection) exists for the parent
+            //if there is a cascade delete setup on your dataset and is allowed
+            //  then these checks are unnecessary
+
+            if(_context.Products.Any(x => x.ManifestItems.Count > 0))
+                throw new ArgumentException($"Product {item.ProductName}  " +
+                    $"  of size {item.QuantityPerUnit} has associated manifest records. Unable to remove.");
+
+            if (_context.Products.Any(x => x.OrderDetails.Count > 0))
+                throw new ArgumentException($"Product {item.ProductName}  " +
+                    $"  of size {item.QuantityPerUnit} has associated order detail records. Unable to remove.");
+
+            //there is two steps to complete the process of adding your data to the database
+            // a) Staging
+            // b) Commit
+
+            EntityEntry<Product> deleting = _context.Entry(item); 
+            deleting.State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
+
+            return _context.SaveChanges();
+        }
+
         #endregion
     }
 }
