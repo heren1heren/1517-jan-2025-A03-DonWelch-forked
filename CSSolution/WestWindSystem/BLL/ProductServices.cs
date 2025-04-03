@@ -337,6 +337,44 @@ namespace WestWindSystem.BLL
             return _context.SaveChanges();
         }
 
+        public int Product_Activation(Product item)
+        {
+            //do any validation needed within the service
+
+            //was data actually passed to the service
+            if (item == null)
+            {
+                throw new ArgumentNullException("Product information was not supplied.");
+            }
+
+            Product exits = null;
+            exits =_context.Products
+                            .FirstOrDefault(x => x.ProductID == item.ProductID);
+            if (exits == null)
+                throw new ArgumentException($"Product {item.ProductName} " +
+                    $" of size {item.QuantityPerUnit} is not on file. Check for the product again.");
+
+            //for the logical delete
+            //  set the appropriate field to the value indicating "delete"
+            //this code is not relying on the user to have set the appropriate
+            //  field on the
+            //  note: no OTHER field on the current record is altered
+            exits.Discontinued = false;
+
+            //there is two steps to complete the process of adding your data to the database
+            // a) Staging
+            // b) Commit
+
+            EntityEntry<Product> updating = _context.Entry(exits); //updating the retreived db record!!!
+            updating.State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+
+            //Commit
+            // this sends the ALL staged data in local memory to the database for processing
+
+            //AFTER the successful commit to the database, 
+            //  the value returned is the number of records altered on the database
+            return _context.SaveChanges();
+        }
         #endregion
     }
 }
